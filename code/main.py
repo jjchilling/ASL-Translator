@@ -246,56 +246,73 @@ def test(model, test_data):
 
 def main():
 
+    # loading model
     datasets = Datasets(ARGS.data, ARGS.task)
-
-
-
     model = VGGModel()
     # checkpoint_path = "checkpoints" + os.sep + "vgg_model" + os.sep + timestamp + os.sep
     # logs_path = "logs" + os.sep + "vgg_model" + os.sep + timestamp + os.sep
     model(tf.keras.Input(shape=(224, 224, 3)))
     # model.vgg16.summary()
     # model.head.summary()
-    # model.vgg16.load_weights('code/vgg16_imagenet.h5', by_name=True)
-    model.vgg16.load_weights(ARGS.load_vgg, by_name=True)
-    model.head.load_weights('checkpoints/vgg_model/042324-233248/vgg.weights.e026-acc0.9286.h5', by_name=True)
+    model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
+    # model.vgg16.load_weights(ARGS.load_vgg, by_name=True)
+    model.head.load_weights('checkpoints/vgg_model/042324-233248/vgg.weights.e026-acc0.9286.h5', by_name=False)
     path = '../data/test/A/A_test.jpg'
     timestamp = datetime.now().strftime("%m%d%y-%H%M%S")
+    model.compile(
+        optimizer=model.optimizer,
+        loss=model.loss_fn,
+        metrics=["sparse_categorical_accuracy"])
+    # test(model, datasets.test_data)
 
 
-
-    # LIME_explainer(model, path, datasets.preprocess_fn, timestamp)
     image = imread(path)
     if len(image.shape) == 2:
         image = np.stack([image, image, image], axis=-1)
     image = resize(image, (hp.img_size, hp.img_size, 3), preserve_range=True)
     image = datasets.preprocess_fn(image)
-    test = datasets.get_data("../data/one/", True, True, True)
-    test_pred = model.predict(test)
-    # test_true = test[1]
-    # test_true = np.array(test_true).flatten()
-    test_pred = np.array(test_pred)
-    test_pred = np.argmax(test_pred, axis=-1).flatten()
-    print("TEST PRED: ", test_pred)
-    # print("TEST TRUE: ", test_true)
+    test = datasets.get_data("../data/test/", True, True, True)
 
+
+    """ a bunch of attempts in LIME_explainer """
+    # LIME_explainer(model, path, datasets.preprocess_fn, timestamp)
+
+
+
+    """ trying to just use model()"""
     # probabilities = model(np.array([image])).numpy()[0]
     # predict_class_idx = np.argmax(probabilities)
+    # print(predict_class_idx)
 
+    """ BEST VERSION I THINK trying to just use model() how tensorboard does"""
+    # can replace datasets.test_data with test to check the folder with one image
+    for batch in datasets.test_data:
+        for i, image in enumerate(batch[0]):
+            correct_class_idx = batch[1][i]
+            probabilities = model(np.array([image])).numpy()[0]
+            predict_class_idx = np.argmax(probabilities)
+            print(correct_class_idx, predict_class_idx)
 
-    real_pred = model.predict(datasets.test_data[0][0])
-    real_true = datasets.test_data[0][1]
-    test_true = np.array(real_true).flatten()
-    real_pred = np.array(real_pred)
-    real_pred = np.argmax(real_pred, axis=-1).flatten()
-    print("real PRED: ", real_pred)
-    print("real TRUE: ", real_true)
-    print("CLASSES: ", datasets.classes)
+    """ using model.predict() """""
+    # first for test (from "one" folder)
+    # test_pred = model.predict(test[0])
+    # test_true = test[0][1]
+    # test_true = np.array(test_true).flatten()
+    # test_pred = np.array(test_pred)
+    # test_pred = np.argmax(test_pred, axis=-1).flatten()
+    # print("TEST PRED: ", test_pred)
+    # print("TEST TRUE: ", test_true)
 
-    print("datasets.test_data", datasets.test_data[1])
-    probabilities = model(np.array(datasets.test_data[2][0])).numpy()[0]
-    predict_class_idx = np.argmax(probabilities)
-    print(predict_class_idx)
+    # then for previous test data
+    # real_pred = model.predict(datasets.test_data[0][0])
+    # real_true = datasets.test_data[0][1]
+    # test_true = np.array(real_true).flatten()
+    # real_pred = np.array(real_pred)
+    # real_pred = np.argmax(real_pred, axis=-1).flatten()
+    # print("real PRED: ", real_pred)
+    # print("real TRUE: ", real_true)
+    # print("CLASSES: ", datasets.classes)
+
 
     # """ Main function. """
 
