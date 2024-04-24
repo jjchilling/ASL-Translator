@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #coding: utf8
+import os
 
 """
 Code originally by Brian R. Pauw and David Mannicke.
@@ -89,11 +90,28 @@ class live():
 
         # Set the size of the output window
         cv2.namedWindow(self.wn, 0)
-
+        fps = int(self.vc.get(cv2.CAP_PROP_FPS))
+        save_interval = 3
+        i = 0
+        
         # Main loop
         while True:
             a = time.perf_counter()
             self.run()
+            ret, frame = self.vc.read()
+            i += 1
+            if ret == False:
+                break
+            if i % (fps * save_interval) == 0:
+                out_path = "/frame" # Make it relative
+                frame_name = 'Frame'+str(i)+'.jpg'
+                cv2.imwrite(os.path.join(out_path, frame_name), frame)
+                
+                
+            
+            
+            # cv2.imshow('frame', frame); cv2.waitKey(0)
+            # cv2.imwrite('test_frame.png', frame)
             print('framerate = {} fps \r'.format(1. / (time.perf_counter() - a)))
     
     
