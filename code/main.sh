@@ -2,6 +2,7 @@
 echo "Running main.py..."
 CONDA_PATH="/Users/my_name/miniforge3/bin/conda"
 source "${CONDA_PATH}/../etc/profile.d/conda.sh"
+conda env list
 conda activate cs1430
 if [ $? -eq 0 ]; then
 	echo "Conda environment activated."
