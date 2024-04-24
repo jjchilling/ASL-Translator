@@ -103,7 +103,7 @@ class live():
             if ret == False:
                 break
             if i % (fps * save_interval) == 0:
-                out_path = "/frame" # Make it relative
+                out_path = "cs1430-finalproject-hchung33-szlim-snrichma/code/frame" # Make it relative
                 frame_name = 'Frame'+str(i)+'.jpg'
                 cv2.imwrite(os.path.join(out_path, frame_name), frame)
                 
