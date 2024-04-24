@@ -10,48 +10,6 @@ from keras.layers import \
 
 import hyperparameters as hp
 
-
-class YourModel(tf.keras.Model):
-    """ Your own neural network model. """
-
-    def __init__(self):
-        super(YourModel, self).__init__()
-
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate=hp.learning_rate)
-              
-        self.architecture = [
-            Conv2D(64, 3, 1, activation="relu", input_shape=(hp.img_size, hp.img_size, 1)),
-            MaxPool2D(pool_size=(2, 2)),
-            Conv2D(64, 3, 1, activation="relu"),
-            MaxPool2D(pool_size=(2, 2)),
-            Conv2D(128, 3, 1, activation="relu"),
-            MaxPool2D(pool_size=(2, 2)),
-            Conv2D(256, 3, 1, activation="relu"),
-            MaxPool2D(pool_size=(2, 2)),
-            Conv2D(512, 3, 1, activation="relu"),
-            MaxPool2D(pool_size=(2, 2)),
-            Dropout(rate=0.6),
-            Flatten(),
-            Dense(512, activation="relu"),
-            Dense(512, activation="relu"),
-            Dense(hp.num_classes, activation='softmax')
-        ]
-
-    def call(self, x):
-        """ Passes input image through the network. """
-
-        for layer in self.architecture:
-            x = layer(x)
-
-        return x
-
-    @staticmethod
-    def loss_fn(labels, predictions):
-        """ Loss function for the model. """
-        return tf.keras.losses.SparseCategoricalCrossentropy()(labels, predictions)
-
-
-
 class VGGModel(tf.keras.Model):
     def __init__(self):
         super(VGGModel, self).__init__()
