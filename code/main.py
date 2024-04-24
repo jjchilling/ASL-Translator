@@ -27,7 +27,6 @@ from live import live
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-
 def parse_args():
     """ Perform command-line argument parsing. """
 
@@ -248,7 +247,6 @@ def main():
         LIME_explainer(model, path, datasets.preprocess_fn, timestamp)
     else:
         train(model, datasets, checkpoint_path, logs_path, init_epoch)
-
 
 # Make arguments global
 ARGS = parse_args()
