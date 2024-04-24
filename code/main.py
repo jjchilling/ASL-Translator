@@ -23,6 +23,7 @@ from lime import lime_image
 from skimage.segmentation import mark_boundaries
 from matplotlib import pyplot as plt
 import numpy as np
+from live import live
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -251,5 +252,5 @@ def main():
 
 # Make arguments global
 ARGS = parse_args()
-
+live()
 main()

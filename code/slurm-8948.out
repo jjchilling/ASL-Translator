@@ -1,0 +1,20 @@
+Running main.py...
+Matplotlib is building the font cache; this may take a moment.
+Dataset mean shape: [224, 224, 3]
+Dataset mean top left pixel value: [0.0000, 0.0000, 0.0000]
+Dataset std shape: [224, 224, 3]
+Dataset std top left pixel value: [0.0000, 0.0000, 0.0000]
+Traceback (most recent call last):
+  File "/ifs/CS/replicated/home/hchung33/cs1430-finalproject-hchung33-szlim-snrichma/code/main.py", line 270, in <module>
+    main()
+  File "/ifs/CS/replicated/home/hchung33/cs1430-finalproject-hchung33-szlim-snrichma/code/main.py", line 214, in main
+    datasets = Datasets(ARGS.data, ARGS.task)
+  File "/ifs/CS/replicated/home/hchung33/cs1430-finalproject-hchung33-szlim-snrichma/code/preprocess.py", line 40, in __init__
+    self.train_data = self.get_data(
+  File "/ifs/CS/replicated/home/hchung33/cs1430-finalproject-hchung33-szlim-snrichma/code/preprocess.py", line 196, in get_data
+    data_gen = data_gen.flow_from_directory(
+  File "/home/hchung33/miniforge3/envs/cs1430/lib/python3.9/site-packages/keras/preprocessing/image.py", line 1469, in flow_from_directory
+    return DirectoryIterator(
+  File "/home/hchung33/miniforge3/envs/cs1430/lib/python3.9/site-packages/keras/preprocessing/image.py", line 507, in __init__
+    for subdir in sorted(os.listdir(directory)):
+FileNotFoundError: [Errno 2] No such file or directory: '../data/train/'
