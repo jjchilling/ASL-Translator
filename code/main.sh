@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Running main.py..."
-CONDA_PATH="/Users/my_name/miniforge3/bin/conda"
+CONDA_PATH="/Users/julie_chung/miniforge3/bin/conda"
 source "${CONDA_PATH}/../etc/profile.d/conda.sh"
 conda env list
 conda activate cs1430
