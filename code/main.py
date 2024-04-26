@@ -12,7 +12,7 @@ from datetime import datetime
 import tensorflow as tf
 
 import hyperparameters as hp
-from models import YourModel, VGGModel
+from models import VGGModel
 from preprocess import Datasets
 from skimage.transform import resize
 from tensorboard_utils import \
@@ -29,7 +29,6 @@ import copy
 from sklearn.utils import check_random_state
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
 
 def parse_args():
     """ Perform command-line argument parsing. """
@@ -378,7 +377,6 @@ def main():
     #     LIME_explainer(model, path, datasets.preprocess_fn, timestamp)
     # else:
     #     train(model, datasets, checkpoint_path, logs_path, init_epoch)
-
 
 # Make arguments global
 ARGS = parse_args()
