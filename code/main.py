@@ -30,6 +30,8 @@ from sklearn.utils import check_random_state
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+model = 0
+
 def parse_args():
     """ Perform command-line argument parsing. """
 
@@ -77,11 +79,28 @@ def parse_args():
     return parser.parse_args()
 
 
+def classify_image():
+    datasets = Datasets(ARGS.data, ARGS.task)
+    test = datasets.get_data("../data/test/", True, True, True)
+    count = 0
+    predictions = []
+    for batch in test:
+        if (count==25):
+            break
+        for i, image in enumerate(batch[0]):
+            correct_class_idx = batch[1][i]
+            probabilities = model(np.array([image])).numpy()[0]
+            predict_class_idx = np.argmax(probabilities)
+            predictions.append(predict_class_idx)
+        count += 1
+    prediction = np.argmax(predictions)
+    print("prediction: ", prediction)
+
+
 def main():
     """ Main function. """
 
     # loading model
-    datasets = Datasets(ARGS.data, ARGS.task)
     model = VGGModel()
     model(tf.keras.Input(shape=(224, 224, 3)))
     model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
@@ -90,18 +109,23 @@ def main():
         optimizer=model.optimizer,
         loss=model.loss_fn,
         metrics=["sparse_categorical_accuracy"])
-    test = datasets.get_data("../test_images/", True, True, True)
 
-    count = 0
-    for batch in test:
-        if (count==30):
-            break
-        for i, image in enumerate(batch[0]):
-            correct_class_idx = batch[1][i]
-            probabilities = model(np.array([image])).numpy()[0]
-            predict_class_idx = np.argmax(probabilities)
-            print(correct_class_idx, predict_class_idx)
-        count += 1
+
+    classify_image()
+    # test = datasets.get_data("../data/test/", True, True, True)
+    # count = 0
+    # predictions = []
+    # for batch in test:
+    #     if (count==25):
+    #         break
+    #     for i, image in enumerate(batch[0]):
+    #         correct_class_idx = batch[1][i]
+    #         probabilities = model(np.array([image])).numpy()[0]
+    #         predict_class_idx = np.argmax(probabilities)
+    #         predictions.append(predict_class_idx)
+    #     count += 1
+    # prediction = np.argmax(predictions)
+    # print("prediction: ", prediction)
             
 
 # Make arguments global
