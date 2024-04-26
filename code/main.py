@@ -76,33 +76,28 @@ def parse_args():
 
     return parser.parse_args()
 
-
-def main():
-    """ Main function. """
-
-    # loading model
+def classify_image(model):
     datasets = Datasets(ARGS.data, ARGS.task)
-    model = VGGModel()
-    model(tf.keras.Input(shape=(224, 224, 3)))
-    model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
-    model.head.load_weights('checkpoints/vgg_model/042324-233248/vgg.weights.e026-acc0.9286.h5', by_name=False)
-    model.compile(
-        optimizer=model.optimizer,
-        loss=model.loss_fn,
-        metrics=["sparse_categorical_accuracy"])
-    test = datasets.get_data("../test_images/", True, True, True)
-
+    test = datasets.get_data("../data/test/", True, True, True)
     count = 0
+    predictions = []
     for batch in test:
-        if (count==30):
+        if (count==25):
             break
         for i, image in enumerate(batch[0]):
             correct_class_idx = batch[1][i]
             probabilities = model(np.array([image])).numpy()[0]
             predict_class_idx = np.argmax(probabilities)
-            print(correct_class_idx, predict_class_idx)
+            predictions.append(predict_class_idx)
         count += 1
-            
+    prediction = np.argmax(predictions)
+    print("prediction: ", prediction)
+
+def main():
+    """ Main function. """
+    # loading model
+    live()
+    # classify_image(model)
 
 # Make arguments global
 ARGS = parse_args()

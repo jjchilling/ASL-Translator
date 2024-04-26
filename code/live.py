@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 #coding: utf8
 import os
+from preprocess import Datasets
+import tensorflow as tf
+from models import VGGModel
 
 """
 Code originally by Brian R. Pauw and David Mannicke.
@@ -50,13 +53,13 @@ from skimage.color import rgb2gray
 
 
 
+
 class live():
     """
     This function shows the live Fourier transform of a continuous stream of 
     images captured from an attached camera.
 
     """
-
     wn = "FD"
     use_camera = True
     im = 0
@@ -71,6 +74,22 @@ class live():
     orientation = 0
 
     def __init__(self, **kwargs):
+        def classify_image(model):
+            datasets = Datasets('..'+os.sep+'data'+os.sep, "3")
+            test = datasets.get_data("../data/test/", True, True, True)
+            count = 0
+            predictions = []
+            for batch in test:
+                if (count==5):
+                    break
+                for i, image in enumerate(batch[0]):
+                    correct_class_idx = batch[1][i]
+                    probabilities = model(np.array([image])).numpy()[0]
+                    predict_class_idx = np.argmax(probabilities)
+                    predictions.append(predict_class_idx)
+                count += 1
+            prediction = np.argmax(predictions)
+            print("prediction: ", prediction)
 
         # Camera device
         # the argument is the device id. If you have more than one camera, you can access them by passing a different id, e.g., cv2.VideoCapture(1)
@@ -91,9 +110,19 @@ class live():
         # Set the size of the output window
         cv2.namedWindow(self.wn, 0)
         fps = int(self.vc.get(cv2.CAP_PROP_FPS))
-        save_interval = 3
+        save_interval = 2
         i = 0
-        
+        out_path = "/Users/julie_chung/Desktop/cs1430/cs1430-finalproject-hchung33-szlim-snrichma/code/frame" # Make it relative
+
+        model = VGGModel()
+        model(tf.keras.Input(shape=(224, 224, 3)))
+        model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
+        model.head.load_weights('checkpoints/vgg_model/042324-233248/vgg.weights.e026-acc0.9286.h5', by_name=False)
+        model.compile(
+        optimizer=model.optimizer,
+        loss=model.loss_fn,
+        metrics=["sparse_categorical_accuracy"])
+
         # Main loop
         while True:
             a = time.perf_counter()
@@ -103,10 +132,13 @@ class live():
             if ret == False:
                 break
             if i % (fps * save_interval) == 0:
-                out_path = "cs1430-finalproject-hchung33-szlim-snrichma/code/frame" # Make it relative
-                frame_name = 'Frame'+str(i)+'.jpg'
+                # frame_name = 'Frame'+str(i)+'.jpg'
+                frame_name = 'Frame.jpg'
                 cv2.imwrite(os.path.join(out_path, frame_name), frame)
-            
+            dir = os.listdir(out_path) 
+            if len(dir) != 0:
+                classify_image(model)
+                
             # cv2.imshow('frame', frame); cv2.waitKey(0)
             # cv2.imwrite('test_frame.png', frame)
             print('framerate = {} fps \r'.format(1. / (time.perf_counter() - a)))
