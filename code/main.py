@@ -24,6 +24,9 @@ from skimage.segmentation import mark_boundaries
 from matplotlib import pyplot as plt
 import numpy as np
 from live import live
+import skimage.segmentation as seg
+import copy
+from sklearn.utils import check_random_state
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -74,181 +77,33 @@ def parse_args():
     return parser.parse_args()
 
 
-def LIME_explainer(model, path, preprocess_fn, timestamp):
-    """
-    This function takes in a trained model and a path to an image and outputs 4
-    visual explanations using the LIME model
-    """
-
-    save_directory = "lime_explainer_images" + os.sep + timestamp
-    if not os.path.exists("lime_explainer_images"):
-        os.mkdir("lime_explainer_images")
-    if not os.path.exists(save_directory):
-        os.mkdir(save_directory)
-    image_index = 0
-
-    def image_and_mask(title, positive_only=True, num_features=5,
-                       hide_rest=True):
-        nonlocal image_index
-
-        temp, mask = explanation.get_image_and_mask(
-            explanation.top_labels[0], positive_only=positive_only,
-            num_features=num_features, hide_rest=hide_rest)
-        plt.imshow(mark_boundaries(temp / 2 + 0.5, mask))
-        plt.title(title)
-
-        image_save_path = save_directory + os.sep + str(image_index) + ".png"
-        plt.savefig(image_save_path, dpi=300, bbox_inches='tight')
-        plt.show()
-
-        image_index += 1
-
-    # Read the image and preprocess it as before
-    image = imread(path)
-    if len(image.shape) == 2:
-        image = np.stack([image, image, image], axis=-1)
-    image = resize(image, (hp.img_size, hp.img_size, 3), preserve_range=True)
-    image = preprocess_fn(image)
-    
-
-    explainer = lime_image.LimeImageExplainer()
-
-    explanation = explainer.explain_instance(
-        image.astype('double'), model.predict, top_labels=5, hide_color=0,
-        num_samples=1000)
-
-    # The top 5 superpixels that are most positive towards the class with the
-    # rest of the image hidden
-    image_and_mask("Top 5 superpixels", positive_only=True, num_features=5,
-                   hide_rest=True)
-
-    # The top 5 superpixels with the rest of the image present
-    image_and_mask("Top 5 with the rest of the image present",
-                   positive_only=True, num_features=5, hide_rest=False)
-
-    # The 'pros and cons' (pros in green, cons in red)
-    image_and_mask("Pros(green) and Cons(red)",
-                   positive_only=False, num_features=10, hide_rest=False)
-
-    # Select the same class explained on the figures above.
-    ind = explanation.top_labels[0]
-    # Map each explanation weight to the corresponding superpixel
-    dict_heatmap = dict(explanation.local_exp[ind])
-    heatmap = np.vectorize(dict_heatmap.get)(explanation.segments)
-    plt.imshow(heatmap, cmap='RdBu', vmin=-heatmap.max(), vmax=heatmap.max())
-    plt.colorbar()
-    plt.title("Map each explanation weight to the corresponding superpixel")
-
-    image_save_path = save_directory + os.sep + str(image_index) + ".png"
-    plt.savefig(image_save_path, dpi=300, bbox_inches='tight')
-    plt.show()
-
-
-def train(model, datasets, checkpoint_path, logs_path, init_epoch):
-    """ Training routine. """
-
-    # Keras callbacks for training
-    callback_list = [
-        tf.keras.callbacks.TensorBoard(
-            log_dir=logs_path,
-            update_freq='batch',
-            profile_batch=0),
-        ImageLabelingLogger(logs_path, datasets),
-        CustomModelSaver(checkpoint_path, ARGS.task, hp.max_num_weights)
-    ]
-
-    # Include confusion logger in callbacks if flag set
-    if ARGS.confusion:
-        callback_list.append(ConfusionMatrixLogger(logs_path, datasets))
-
-    # Begin training
-    model.fit(
-        x=datasets.train_data,
-        validation_data=datasets.test_data,
-        epochs=hp.num_epochs,
-        batch_size=None,            # Required as None as we use an ImageDataGenerator; see preprocess.py get_data()
-        callbacks=callback_list,
-        initial_epoch=init_epoch,
-    )
-
-
-def test(model, test_data):
-    """ Testing routine. """
-
-    # Run model on test set
-    model.evaluate(
-        x=test_data,
-        verbose=1,
-    )
-
-
 def main():
     """ Main function. """
 
-    time_now = datetime.now()
-    timestamp = time_now.strftime("%m%d%y-%H%M%S")
-    init_epoch = 0
-
-    # If loading from a checkpoint, the loaded checkpoint's directory
-    # will be used for future checkpoints
-    if ARGS.load_checkpoint is not None:
-        ARGS.load_checkpoint = os.path.abspath(ARGS.load_checkpoint)
-
-        # Get timestamp and epoch from filename
-        regex = r"(?:.+)(?:\.e)(\d+)(?:.+)(?:.h5)"
-        init_epoch = int(re.match(regex, ARGS.load_checkpoint).group(1)) + 1
-        timestamp = os.path.basename(os.path.dirname(ARGS.load_checkpoint))
-
-    # If paths provided by program arguments are accurate, then this will
-    # ensure they are used. If not, these directories/files will be
-    # set relative to the directory of main.py
-    if os.path.exists(ARGS.data):
-        ARGS.data = os.path.abspath(ARGS.data)
-    if os.path.exists(ARGS.load_vgg):
-        ARGS.load_vgg = os.path.abspath(ARGS.load_vgg)
-
-    # Run script from location of main.py
-    os.chdir(sys.path[0])
-
+    # loading model
     datasets = Datasets(ARGS.data, ARGS.task)
-
     model = VGGModel()
-    checkpoint_path = "checkpoints" + os.sep + \
-            "vgg_model" + os.sep + timestamp + os.sep
-    logs_path = "logs" + os.sep + "vgg_model" + \
-            os.sep + timestamp + os.sep
     model(tf.keras.Input(shape=(224, 224, 3)))
-
-        # Print summaries for both parts of the model
-    model.vgg16.summary()
-    model.head.summary()
-
-        # Load base of VGG model
-    model.vgg16.load_weights(ARGS.load_vgg, by_name=True)
-
-    # Load checkpoints
-    if ARGS.load_checkpoint is not None:
-        model.head.load_weights(ARGS.load_checkpoint, by_name=False)
-
-    # Make checkpoint directory if needed
-    if not ARGS.evaluate and not os.path.exists(checkpoint_path):
-        os.makedirs(checkpoint_path)
-
-    # Compile model graph
+    model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
+    model.head.load_weights('checkpoints/vgg_model/042324-233248/vgg.weights.e026-acc0.9286.h5', by_name=False)
     model.compile(
         optimizer=model.optimizer,
         loss=model.loss_fn,
         metrics=["sparse_categorical_accuracy"])
+    test = datasets.get_data("../test_images/", True, True, True)
 
-    if ARGS.evaluate:
-        test(model, datasets.test_data)
-
-        path = ARGS.lime_image
-        LIME_explainer(model, path, datasets.preprocess_fn, timestamp)
-    else:
-        train(model, datasets, checkpoint_path, logs_path, init_epoch)
+    """ BEST VERSION I THINK trying to just use model() how tensorboard does"""
+    # can replace datasets.test_data with test to check the folder with one image
+    # for batch in datasets.test_data:
+    for batch in test:
+        for i, image in enumerate(batch[0]):
+            correct_class_idx = batch[1][i]
+            probabilities = model(np.array([image])).numpy()[0]
+            predict_class_idx = np.argmax(probabilities)
+            print(correct_class_idx, predict_class_idx)
+            
 
 # Make arguments global
 ARGS = parse_args()
-live()
+# live()
 main()
