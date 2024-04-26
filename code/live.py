@@ -98,6 +98,7 @@ class live():
         while True:
             a = time.perf_counter()
             self.run()
+<<<<<<< HEAD
             ret, frame = self.vc.read()
             i += 1
             if ret == False:
@@ -113,6 +114,9 @@ class live():
             # cv2.imshow('frame', frame); cv2.waitKey(0)
             # cv2.imwrite('test_frame.png', frame)
             print('framerate = {} fps \r'.format(1. / (time.perf_counter() - a)))
+=======
+            # print('framerate = {} fps \r'.format(1. / (time.perf_counter() - a)))
+>>>>>>> 5ca0ad3665a4a150596247727d956cae78d36440
     
     
         if self.use_camera:
