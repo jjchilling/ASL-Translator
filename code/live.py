@@ -7,16 +7,16 @@ Code originally by Brian R. Pauw and David Mannicke.
 Modified by James Tompkin for Brown CSCI1430.
 
 Initial Python coding and refactoring:
-	Brian R. Pauw
+    Brian R. Pauw
 With input from:
-	Samuel Tardif
+    Samuel Tardif
 
 Windows compatibility resolution: 
-	David Mannicke
-	Chris Garvey
+    David Mannicke
+    Chris Garvey
 
 Windows compiled version:
-	Joachim Kohlbrecher
+    Joachim Kohlbrecher
 """
 
 """
@@ -98,7 +98,6 @@ class live():
         while True:
             a = time.perf_counter()
             self.run()
-<<<<<<< HEAD
             ret, frame = self.vc.read()
             i += 1
             if ret == False:
@@ -107,16 +106,10 @@ class live():
                 out_path = "cs1430-finalproject-hchung33-szlim-snrichma/code/frame" # Make it relative
                 frame_name = 'Frame'+str(i)+'.jpg'
                 cv2.imwrite(os.path.join(out_path, frame_name), frame)
-                
-                
-            
             
             # cv2.imshow('frame', frame); cv2.waitKey(0)
             # cv2.imwrite('test_frame.png', frame)
             print('framerate = {} fps \r'.format(1. / (time.perf_counter() - a)))
-=======
-            # print('framerate = {} fps \r'.format(1. / (time.perf_counter() - a)))
->>>>>>> 5ca0ad3665a4a150596247727d956cae78d36440
     
     
         if self.use_camera:
@@ -142,3 +135,4 @@ class live():
 
 if __name__ == '__main__':
     live()
+
