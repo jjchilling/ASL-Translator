@@ -92,15 +92,16 @@ def main():
         metrics=["sparse_categorical_accuracy"])
     test = datasets.get_data("../test_images/", True, True, True)
 
-    """ BEST VERSION I THINK trying to just use model() how tensorboard does"""
-    # can replace datasets.test_data with test to check the folder with one image
-    # for batch in datasets.test_data:
+    count = 0
     for batch in test:
+        if (count==30):
+            break
         for i, image in enumerate(batch[0]):
             correct_class_idx = batch[1][i]
             probabilities = model(np.array([image])).numpy()[0]
             predict_class_idx = np.argmax(probabilities)
             print(correct_class_idx, predict_class_idx)
+        count += 1
             
 
 # Make arguments global
