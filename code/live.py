@@ -94,7 +94,7 @@ class live():
         while True:
             a = time.perf_counter()
             self.run()
-            print('framerate = {} fps \r'.format(1. / (time.perf_counter() - a)))
+            # print('framerate = {} fps \r'.format(1. / (time.perf_counter() - a)))
     
     
         if self.use_camera:
