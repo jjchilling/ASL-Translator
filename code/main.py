@@ -92,9 +92,6 @@ def main():
         metrics=["sparse_categorical_accuracy"])
     test = datasets.get_data("../test_images/", True, True, True)
 
-    """ BEST VERSION I THINK trying to just use model() how tensorboard does"""
-    # can replace datasets.test_data with test to check the folder with one image
-    # for batch in datasets.test_data:
     count = 0
     for batch in test:
         if (count==30):
