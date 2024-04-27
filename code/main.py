@@ -115,7 +115,7 @@ def main():
     datasets = Datasets(ARGS.data, ARGS.task)
 
     # just for training the model
-    if ARGS.train == 'True':
+    if ARGS.train is not None:
         print("TRAIN")
         
         time_now = datetime.now()
@@ -148,7 +148,7 @@ def main():
 
         train(model, datasets, checkpoint_path, logs_path, init_epoch)
 
-
+############################################################
     else :
         """ Main function. """
         # loading model
