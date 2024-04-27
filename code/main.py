@@ -115,38 +115,29 @@ def main():
     datasets = Datasets(ARGS.data, ARGS.task)
 
     # just for training the model
-    if ARGS.train is not None:
-        print("TRAIN")
+    if ARGS.train == 'True':
         
         time_now = datetime.now()
         timestamp = time_now.strftime("%m%d%y-%H%M%S")
         init_epoch = 0
-        checkpoint_path = "checkpoints" + os.sep + \
-            "vgg_model" + os.sep + timestamp + os.sep
+        os.chdir(sys.path[0])
         logs_path = "logs" + os.sep + "vgg_model" + \
             os.sep + timestamp + os.sep
-        
         model = VGGModel()
         checkpoint_path = "checkpoints" + os.sep + \
             "vgg_model" + os.sep + timestamp + os.sep
         logs_path = "logs" + os.sep + "vgg_model" + \
             os.sep + timestamp + os.sep
         model(tf.keras.Input(shape=(224, 224, 3)))
-
-        # Print summaries for both parts of the model
-        model.vgg16.summary()
-        model.head.summary()
-
-        # Load base of VGG model
         model.vgg16.load_weights(ARGS.load_vgg, by_name=True)
-
+        os.makedirs(checkpoint_path)
         model.compile(
         optimizer=model.optimizer,
         loss=model.loss_fn,
         metrics=["sparse_categorical_accuracy"])
 
-
         train(model, datasets, checkpoint_path, logs_path, init_epoch)
+
 
 ############################################################
     else :
