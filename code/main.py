@@ -146,7 +146,8 @@ def main():
         model = VGGModel()
         model(tf.keras.Input(shape=(224, 224, 3)))
         model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
-        model.head.load_weights('checkpoints/vgg_model/042324-233248/vgg.weights.e026-acc0.9286.h5', by_name=False)
+        # model.head.load_weights('checkpoints/vgg_model/042324-233248/vgg.weights.e026-acc0.9286.h5', by_name=False)
+        model.head.load_weights('checkpoints/vgg_model/vgg.weights.e025-acc0.8621.h5', by_name=False)
         model.compile(
             optimizer=model.optimizer,
             loss=model.loss_fn,
