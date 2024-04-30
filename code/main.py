@@ -94,7 +94,7 @@ def test(model, test_data):
 
 
 def classify_image():
-    datasets = Datasets(ARGS.data, ARGS.task)
+    datasets = Datasets(ARGS.data, '3')
     test = datasets.get_data("../data/test/", True, True, True)
     count = 0
     predictions = []
@@ -112,7 +112,8 @@ def classify_image():
 
 
 def main():
-    datasets = Datasets(ARGS.data, ARGS.task)
+
+    datasets = Datasets(ARGS.data, '3')
 
     # just for training the model
     if ARGS.train == 'True':
@@ -147,7 +148,7 @@ def main():
         model(tf.keras.Input(shape=(224, 224, 3)))
         model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
         # model.head.load_weights('checkpoints/vgg_model/042324-233248/vgg.weights.e026-acc0.9286.h5', by_name=False)
-        model.head.load_weights('checkpoints/vgg_model/vgg.weights.e025-acc0.8621.h5', by_name=False)
+        model.head.load_weights('checkpoints/vgg_model/vgg.weights.e012-acc0.9655.h5', by_name=False)
         model.compile(
             optimizer=model.optimizer,
             loss=model.loss_fn,
@@ -155,19 +156,25 @@ def main():
         # classify_image()
 
 
-        test = datasets.get_data("../data/test/", True, True, True)
+        test = datasets.get_data("../data/test", True, True, True)
         count = 0
         predictions = []
+
         for batch in test:
             if (count==25):
                 break
             for i, image in enumerate(batch[0]):
                 correct_class_idx = batch[1][i]
-                probabilities = model(np.array([image])).numpy()[0]
+                
+                #probabilities = model.vgg16(np.array([image])).numpy()[0]
+                output = model.call(np.array([image]))
+                probabilities = output.numpy()[0]
                 predict_class_idx = np.argmax(probabilities)
                 predictions.append(predict_class_idx)
             count += 1
         prediction = np.argmax(predictions)
+        prediction_label = datasets.idx_to_class[predict_class_idx]
+        print("Predicted label:", prediction_label)
         print("prediction: ", prediction)
             
 
