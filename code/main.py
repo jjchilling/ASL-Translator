@@ -162,19 +162,20 @@ def main():
     else :
         """ Main function. """
         # loading model
-        model = VGGModel()
-        model(tf.keras.Input(shape=(224, 224, 3)))
-        model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
-        # model.head.load_weights('checkpoints/vgg_model/042324-233248/vgg.weights.e026-acc0.9286.h5', by_name=False)
-        model.head.load_weights('checkpoints/vgg_model/043024-144031//vgg.weights.e012-acc0.9655.h5', by_name=False)
-        model.compile(
-            optimizer=model.optimizer,
-            loss=model.loss_fn,
-            metrics=["sparse_categorical_accuracy"])
-        classify_image(datasets, model)
+        # model = VGGModel()
+        # model(tf.keras.Input(shape=(224, 224, 3)))
+        # model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
+        # # model.head.load_weights('checkpoints/vgg_model/042324-233248/vgg.weights.e026-acc0.9286.h5', by_name=False)
+        # model.head.load_weights('checkpoints/vgg_model/043024-144031//vgg.weights.e012-acc0.9655.h5', by_name=False)
+        # model.compile(
+        #     optimizer=model.optimizer,
+        #     loss=model.loss_fn,
+        #     metrics=["sparse_categorical_accuracy"])
+        # classify_image(datasets, model)
             
 
 # Make arguments global
 ARGS = parse_args()
-# live()
-main()
+# main()
+live()
+
