@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #coding: utf8
-import os
+
+
 
 """
 Code originally by Brian R. Pauw and David Mannicke.
@@ -43,10 +44,15 @@ import cv2 # opencv-based functions
 import time
 import math
 import numpy as np
-from scipy import ndimage
+from scipy import stats
 from skimage import io
 from skimage import img_as_float32, img_as_ubyte
 from skimage.color import rgb2gray
+from preprocess import Datasets
+from models import VGGModel
+import os
+import tensorflow as tf
+from matplotlib import pyplot as plt
 
 
 
@@ -72,6 +78,52 @@ class live():
 
     def __init__(self, **kwargs):
 
+        model = VGGModel()
+        model(tf.keras.Input(shape=(224, 224, 3)))
+        model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
+        model.head.load_weights('checkpoints/vgg_model/043024-144031//vgg.weights.e012-acc0.9655.h5', by_name=False)
+        model.compile(
+            optimizer=model.optimizer,
+            loss=model.loss_fn,
+            metrics=["sparse_categorical_accuracy"])
+
+        def classify_image(model):
+            datasets = Datasets('..'+os.sep+'data'+os.sep, '3')
+            print("I'M HERE")
+            test = datasets.get_data("/Users/julie_chung/Desktop/cs1430/cs1430-finalproject-hchung33-szlim-snrichma/code/frame/test", True, True, True)
+            count = 0
+            predictions = []
+
+            for batch in test:
+                if (count==29):
+                    break
+                for i, image in enumerate(batch[0]):
+                    correct_class_idx = batch[1][i]
+                    #probabilities = model.vgg16(np.array([image])).numpy()[0]
+                    output = model.call(np.array([image]))
+                    probabilities = output.numpy()[0]
+                    predict_class_idx = np.argmax(probabilities)
+                    predictions.append(predict_class_idx)
+                    prediction_label = datasets.idx_to_class[predict_class_idx]
+                    # print("Predicted label:", prediction_label)
+
+                    # This undoes vgg processing from stencil
+                    mean = [103.939, 116.779, 123.68]
+                    image[..., 0] += mean[0]
+                    image[..., 1] += mean[1]
+                    image[..., 2] += mean[2]
+                    image = image[:, :, ::-1]
+                    image = image / 255.
+                    image = np.clip(image, 0., 1.)
+                    
+                    #shows the image so you can compare it to the predicted label in the terminal
+                    # plt.imshow(image)
+                    # plt.show()
+
+                count += 1
+            prediction = stats.mode(predictions)
+            print("Predicted label:", datasets.idx_to_class[prediction[0][0]])
+
         # Camera device
         # the argument is the device id. If you have more than one camera, you can access them by passing a different id, e.g., cv2.VideoCapture(1)
         self.vc = cv2.VideoCapture(0)
@@ -81,7 +133,7 @@ class live():
 
         if self.use_camera == False:
             # No camera!
-            self.im = rgb2gray(img_as_float32(io.imread('images/YuanningHuCrop.png'))) # One of our intrepid TAs (Yuanning was one of our HTAs for Spring 2019)
+            self.im = rgb2gray(img_as_float32(io.imread('images/YuanningHuCrop.png'))) 
         else:
             # We found a camera!
             # Requested camera size. This will be cropped square later on, e.g., 240 x 240
@@ -91,11 +143,12 @@ class live():
         # Set the size of the output window
         cv2.namedWindow(self.wn, 0)
         fps = int(self.vc.get(cv2.CAP_PROP_FPS))
-        save_interval = 3
+        save_interval = 1
         i = 0
-        
+        out_path = "/Users/julie_chung/Desktop/cs1430/cs1430-finalproject-hchung33-szlim-snrichma/code/frame/test/A"
         # Main loop
         while True:
+            direct = os.listdir(out_path)
             a = time.perf_counter()
             self.run()
             ret, frame = self.vc.read()
@@ -103,13 +156,14 @@ class live():
             if ret == False:
                 break
             if i % (fps * save_interval) == 0:
-                out_path = "cs1430-finalproject-hchung33-szlim-snrichma/code/frame" # Make it relative
-                frame_name = 'Frame'+str(i)+'.jpg'
+                frame_name = 'Frame.jpg'
                 cv2.imwrite(os.path.join(out_path, frame_name), frame)
-            
+            if len(direct) != 0:
+                classify_image(model)
+                os.remove(out_path + '/' + 'Frame.jpg')
             # cv2.imshow('frame', frame); cv2.waitKey(0)
             # cv2.imwrite('test_frame.png', frame)
-            print('framerate = {} fps \r'.format(1. / (time.perf_counter() - a)))
+            # print('framerate = {} fps \r'.format(1. / (time.perf_counter() - a)))
     
     
         if self.use_camera:
