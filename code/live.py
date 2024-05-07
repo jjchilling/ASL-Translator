@@ -87,10 +87,9 @@ class live():
             loss=model.loss_fn,
             metrics=["sparse_categorical_accuracy"])
 
-        def classify_image(model):
+        def classify_image(model, labels):
             datasets = Datasets('..'+os.sep+'data'+os.sep, '3')
-            print("I'M HERE")
-            test = datasets.get_data("/Users/julie_chung/Desktop/cs1430/cs1430-finalproject-hchung33-szlim-snrichma/code/frame/test", True, True, True)
+            test = datasets.get_data("/Users/sarah/Desktop/csci1430/CS1430_Projects/cs1430-finalproject-hchung33-szlim-snrichma/code/frame/test", True, True, True)
             count = 0
             predictions = []
 
@@ -122,7 +121,16 @@ class live():
 
                 count += 1
             prediction = stats.mode(predictions)
-            print("Predicted label:", datasets.idx_to_class[prediction[0][0]])
+            if (prediction[0].size!=0):
+                predicted_label = datasets.idx_to_class[prediction[0][0]]
+                print("Predicted label:", predicted_label)
+                if (predicted_label == "del"):
+                    labels = labels[:-1]
+                elif (predicted_label == "space"):
+                    labels = labels + " "
+                elif (predicted_label != "nothing" and (len(labels)==0 or predicted_label != labels[-1])):
+                    labels = labels + predicted_label
+            return labels
 
         # Camera device
         # the argument is the device id. If you have more than one camera, you can access them by passing a different id, e.g., cv2.VideoCapture(1)
@@ -145,7 +153,8 @@ class live():
         fps = int(self.vc.get(cv2.CAP_PROP_FPS))
         save_interval = 1
         i = 0
-        out_path = "/Users/julie_chung/Desktop/cs1430/cs1430-finalproject-hchung33-szlim-snrichma/code/frame/test/A"
+        out_path = "/Users/sarah/Desktop/csci1430/CS1430_Projects/cs1430-finalproject-hchung33-szlim-snrichma/code/frame/test/A"
+        labels = ""
         # Main loop
         while True:
             direct = os.listdir(out_path)
@@ -159,7 +168,8 @@ class live():
                 frame_name = 'Frame.jpg'
                 cv2.imwrite(os.path.join(out_path, frame_name), frame)
             if len(direct) != 0:
-                classify_image(model)
+                labels = classify_image(model, labels)
+                print(labels)
                 os.remove(out_path + '/' + 'Frame.jpg')
             # cv2.imshow('frame', frame); cv2.waitKey(0)
             # cv2.imwrite('test_frame.png', frame)
