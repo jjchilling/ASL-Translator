@@ -41,6 +41,7 @@ __date__ = "2014/01/25; modifications 2017--2019"
 __status__ = "v2.1"
 
 import cv2 # opencv-based functions
+import cvlib as cv
 import time
 import math
 import numpy as np
@@ -142,7 +143,8 @@ class live():
 
         if self.use_camera == False:
             # No camera!
-            self.im = rgb2gray(img_as_float32(io.imread('images/YuanningHuCrop.png'))) 
+            print("yay")
+            # self.im = rgb2gray(img_as_float32(io.imread('images/YuanningHuCrop.png'))) 
         else:
             # We found a camera!
             # Requested camera size. This will be cropped square later on, e.g., 240 x 240
@@ -162,8 +164,8 @@ class live():
             a = time.perf_counter()
             self.run()
             ret, frame = self.vc.read()
-            bbox, label, config = cv2.detect_common_objects(frame)
-            output_image = cv2.draw_bbox(frame, bbox, label, config)
+            bbox, label, config = cv.detect_common_objects(frame)
+            output_image = cv.object_detection.draw_bbox(frame, bbox, label, config)
             cv2.imshow("Object Detection", output_image)
             
             if cv2.waitKey(1) & 0xFF == ord("q"):
