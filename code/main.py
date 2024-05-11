@@ -56,6 +56,10 @@ def parse_args():
         default='vgg16_imagenet.h5',
         help='''Path to pre-trained VGG-16 file (only applicable to
         task 3).''')
+    parser.add_argument(
+        '--allowdoubles',
+        default=False,
+        help='Whether or not we print when the same letter is found twice in a row')
 
     return parser.parse_args()
 
@@ -177,5 +181,5 @@ def main():
 # Make arguments global
 ARGS = parse_args()
 # main()
-live()
+live(ARGS.allowdoubles)
 
