@@ -41,7 +41,7 @@ __date__ = "2014/01/25; modifications 2017--2019"
 __status__ = "v2.1"
 
 import cv2 # opencv-based functions
-import cvlib as cv
+# import cvlib as cv
 import time
 import math
 import numpy as np

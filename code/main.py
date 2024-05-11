@@ -180,6 +180,6 @@ def main():
 
 # Make arguments global
 ARGS = parse_args()
-# main()
+main()
 live(ARGS.allowdoubles)
 
