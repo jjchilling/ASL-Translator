@@ -75,9 +75,10 @@ class live():
     # Variables for animated basis demo
     magnitude = 2
     orientation = 0
+    allow_doubles = False
 
-    def __init__(self, **kwargs):
-
+    def __init__(self, allowdoubles):
+        self.allow_doubles = allowdoubles
         model = VGGModel()
         model(tf.keras.Input(shape=(224, 224, 3)))
         model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
@@ -128,7 +129,7 @@ class live():
                     labels = labels[:-1]
                 elif (predicted_label == "space"):
                     labels = labels + " "
-                elif (predicted_label != "nothing" and (len(labels)==0 or predicted_label != labels[-1])):
+                elif (predicted_label != "nothing" and (len(labels)==0 or (self.allow_doubles or predicted_label != labels[-1]))):
                     labels = labels + predicted_label
             return labels
 
