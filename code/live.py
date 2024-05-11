@@ -89,7 +89,7 @@ class live():
 
         def classify_image(model, labels):
             datasets = Datasets('..'+os.sep+'data'+os.sep, '3')
-            test = datasets.get_data("/Users/sarah/Desktop/csci1430/CS1430_Projects/cs1430-finalproject-hchung33-szlim-snrichma/code/frame/test", True, True, True)
+            test = datasets.get_data(os.getcwd()+os.sep+'frame'+os.sep+'test', True, True, True)
             count = 0
             predictions = []
 
@@ -153,7 +153,7 @@ class live():
         fps = int(self.vc.get(cv2.CAP_PROP_FPS))
         save_interval = 1
         i = 0
-        out_path = "/Users/sarah/Desktop/csci1430/CS1430_Projects/cs1430-finalproject-hchung33-szlim-snrichma/code/frame/test/A"
+        out_path = os.getcwd()+os.sep+'frame'+os.sep+'test'+os.sep+'A'
         labels = ""
         # Main loop
         while True:
@@ -161,6 +161,13 @@ class live():
             a = time.perf_counter()
             self.run()
             ret, frame = self.vc.read()
+            bbox, label, config = cv2.detect_common_objects(frame)
+            output_image = cv2.draw_bbox(frame, bbox, label, config)
+            cv2.imshow("Object Detection", output_image)
+            
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+
             i += 1
             if ret == False:
                 break
