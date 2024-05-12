@@ -41,6 +41,7 @@ __date__ = "2014/01/25; modifications 2017--2019"
 __status__ = "v2.1"
 
 import cv2 # opencv-based functions
+import cvlib as cv
 import time
 import math
 import numpy as np
@@ -90,7 +91,7 @@ class live():
 
         def classify_image(model, labels):
             datasets = Datasets('..'+os.sep+'data'+os.sep, '3')
-            test = datasets.get_data("/Users/sarah/Desktop/csci1430/CS1430_Projects/cs1430-finalproject-hchung33-szlim-snrichma/code/frame/test", True, True, True)
+            test = datasets.get_data(os.getcwd()+os.sep+'frame'+os.sep+'test', True, True, True)
             count = 0
             predictions = []
 
@@ -126,23 +127,27 @@ class live():
                 predicted_label = datasets.idx_to_class[prediction[0][0]]
                 print("Predicted label:", predicted_label)
                 if (predicted_label == "del"):
-                    labels = labels[:-1]
+                    labels = labels[:-3]
                 elif (predicted_label == "space"):
                     labels = labels + " "
                 elif (predicted_label != "nothing" and (len(labels)==0 or (self.allow_doubles or predicted_label != labels[-1]))):
-                    labels = labels + predicted_label
-            return labels
+                    if labels != "":
+                        labels = labels + ", " + predicted_label
+                    else:
+                        labels = labels + predicted_label
+            return predicted_label, labels
 
         # Camera device
         # the argument is the device id. If you have more than one camera, you can access them by passing a different id, e.g., cv2.VideoCapture(1)
-        self.vc = cv2.VideoCapture(0)
+        self.vc = cv2.VideoCapture(1)
         if not self.vc.isOpened():
             print( "No camera found or error opening camera; using a static image instead." )
             self.use_camera = False
 
         if self.use_camera == False:
             # No camera!
-            self.im = rgb2gray(img_as_float32(io.imread('images/YuanningHuCrop.png'))) 
+            print("yay")
+            # self.im = rgb2gray(img_as_float32(io.imread('images/YuanningHuCrop.png'))) 
         else:
             # We found a camera!
             # Requested camera size. This will be cropped square later on, e.g., 240 x 240
@@ -154,14 +159,17 @@ class live():
         fps = int(self.vc.get(cv2.CAP_PROP_FPS))
         save_interval = 1
         i = 0
-        out_path = "/Users/sarah/Desktop/csci1430/CS1430_Projects/cs1430-finalproject-hchung33-szlim-snrichma/code/frame/test/A"
+        out_path = os.getcwd()+os.sep+'frame'+os.sep+'test'+os.sep+'A'
         labels = ""
+        predicted_label = ""
         # Main loop
         while True:
             direct = os.listdir(out_path)
             a = time.perf_counter()
             self.run()
             ret, frame = self.vc.read()
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
             i += 1
             if ret == False:
                 break
@@ -169,20 +177,21 @@ class live():
                 frame_name = 'Frame.jpg'
                 cv2.imwrite(os.path.join(out_path, frame_name), frame)
             if len(direct) != 0:
-                labels = classify_image(model, labels)
+                predicted_label, labels = classify_image(model, labels)
                 print(labels)
                 os.remove(out_path + '/' + 'Frame.jpg')
-            # cv2.imshow('frame', frame); cv2.waitKey(0)
-            # cv2.imwrite('test_frame.png', frame)
-            # print('framerate = {} fps \r'.format(1. / (time.perf_counter() - a)))
-    
-    
+            if labels == "":
+                cv2.imshow("live cam", frame)
+            else:
+                cv2.putText(frame, "Label history: " + labels, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                cv2.putText(frame, "Current predicted label: " + predicted_label, (50, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                cv2.imshow("live cam", frame)
+        
         if self.use_camera:
-            # Stop camera
             self.vc.release()
+            cv2.destroyAllWindows()
     
     def run(self):
-        
         if self.use_camera:
             # Read image. 
             # Some cameras will return 'None' on read until they are initialized, 
@@ -191,7 +200,7 @@ class live():
             while im is None:
                 rval, im = self.vc.read()
 
-        cv2.imshow("live cam", im) # faster alternative
+        # cv2.imshow("live cam", im) # faster alternative
         
         cv2.waitKey(1)
 
