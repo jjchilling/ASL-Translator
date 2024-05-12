@@ -14,19 +14,15 @@ import tensorflow as tf
 import hyperparameters as hp
 from models import VGGModel
 from preprocess import Datasets
-from skimage.transform import resize
 from tensorboard_utils import \
         ImageLabelingLogger, ConfusionMatrixLogger, CustomModelSaver
 
-from skimage.io import imread
-from lime import lime_image
-from skimage.segmentation import mark_boundaries
 from matplotlib import pyplot as plt
 import numpy as np
 from live import live
-import skimage.segmentation as seg
+
 import copy
-from sklearn.utils import check_random_state
+
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 

@@ -139,7 +139,7 @@ class live():
 
         # Camera device
         # the argument is the device id. If you have more than one camera, you can access them by passing a different id, e.g., cv2.VideoCapture(1)
-        self.vc = cv2.VideoCapture(0)
+        self.vc = cv2.VideoCapture(1)
         if not self.vc.isOpened():
             print( "No camera found or error opening camera; using a static image instead." )
             self.use_camera = False
