@@ -33,8 +33,6 @@ import os
 import tensorflow as tf
 
 
-
-
 class live():
     """
     This class represents a live image capture and classification system.
