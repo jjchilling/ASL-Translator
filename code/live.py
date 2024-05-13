@@ -1,11 +1,8 @@
-#!/usr/bin/env python
-#coding: utf8
-
-
 
 """
 Code originally by Brian R. Pauw and David Mannicke.
 Modified by James Tompkin for Brown CSCI1430.
+Modified by Sophia Lim, Hee Su Chung, Sarah Richman for CSCI1430 Final Project
 
 Initial Python coding and refactoring:
     Brian R. Pauw
@@ -23,62 +20,46 @@ Windows compiled version:
 """
 Overview
 ========
-This program uses OpenCV to capture images from the camera, Fourier transform
-them and show the Fourier transformed image alongside the original on the screen.
-
-$ ./liveFFT2.py
-
-Required: A Python 3.x installation (tested on 3.7.9),
-with: 
-    - OpenCV (for camera reading)
-    - numpy, matplotlib, scipy, argparse
+This program captures images from a camera using OpenCV and performs image classification using a pre-trained VGG model.
 """
 
-__author__ = "Brian R. Pauw, David Mannicke; modified for Brown CSCI 1430 by James Tompkin"
-__contact__ = "brian@stack.nl; james_tompkin@brown.edu"
-__license__ = "GPLv3+"
-__date__ = "2014/01/25; modifications 2017--2019"
-__status__ = "v2.1"
-
 import cv2 # opencv-based functions
-import cvlib as cv
 import time
-import math
+# import math
 import numpy as np
 from scipy import stats
-from skimage import io
-from skimage import img_as_float32, img_as_ubyte
-from skimage.color import rgb2gray
+# from skimage import io
+# from skimage import img_as_float32, img_as_ubyte
+# from skimage.color import rgb2gray
 from preprocess import Datasets
 from models import VGGModel
 import os
 import tensorflow as tf
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
 
 
 class live():
     """
-    This function shows the live Fourier transform of a continuous stream of 
-    images captured from an attached camera.
+    This class represents a live image capture and classification system.
+
+    Parameters:
+        allowdoubles (bool): A flag indicating whether duplicate labels are allowed in classification history.
 
     """
 
     wn = "FD"
     use_camera = True
     im = 0
-    imJack = 0
-    phaseOffset = 0
-    rollOffset = 0
-    # Variable for animating basis reconstruction
-    frequencyCutoffDist = 1
-    frequencyCutoffDirection = 1
-    # Variables for animated basis demo
-    magnitude = 2
-    orientation = 0
     allow_doubles = False
 
     def __init__(self, allowdoubles):
+        """
+        Initializes the live class.
+
+        Parameters:
+            allowdoubles (bool): A flag indicating whether duplicate labels are allowed in classification history.
+        """
         self.allow_doubles = allowdoubles
         model = VGGModel()
         model(tf.keras.Input(shape=(224, 224, 3)))
@@ -90,6 +71,17 @@ class live():
             metrics=["sparse_categorical_accuracy"])
 
         def classify_image(model, labels):
+            """
+            Classifies the captured image and updates the classification history.
+
+            Parameters:
+                model: Pre-trained VGG model for image classification.
+                labels: String representing the classification history.
+
+            Returns:
+                predicted_label (str): The predicted label for the captured image.
+                labels (str): Updated classification history.
+            """
             datasets = Datasets('..'+os.sep+'data'+os.sep, '3')
             test = datasets.get_data(os.getcwd()+os.sep+'frame'+os.sep+'test', True, True, True)
             count = 0
@@ -100,13 +92,11 @@ class live():
                     break
                 for i, image in enumerate(batch[0]):
                     correct_class_idx = batch[1][i]
-                    #probabilities = model.vgg16(np.array([image])).numpy()[0]
                     output = model.call(np.array([image]))
                     probabilities = output.numpy()[0]
                     predict_class_idx = np.argmax(probabilities)
                     predictions.append(predict_class_idx)
                     prediction_label = datasets.idx_to_class[predict_class_idx]
-                    # print("Predicted label:", prediction_label)
 
                     # This undoes vgg processing from stencil
                     mean = [103.939, 116.779, 123.68]
@@ -139,15 +129,14 @@ class live():
 
         # Camera device
         # the argument is the device id. If you have more than one camera, you can access them by passing a different id, e.g., cv2.VideoCapture(1)
-        self.vc = cv2.VideoCapture(1)
+        self.vc = cv2.VideoCapture(0)
         if not self.vc.isOpened():
             print( "No camera found or error opening camera; using a static image instead." )
             self.use_camera = False
 
         if self.use_camera == False:
-            # No camera!
-            print("yay")
-            # self.im = rgb2gray(img_as_float32(io.imread('images/YuanningHuCrop.png'))) 
+    
+            return
         else:
             # We found a camera!
             # Requested camera size. This will be cropped square later on, e.g., 240 x 240
@@ -192,6 +181,9 @@ class live():
             cv2.destroyAllWindows()
     
     def run(self):
+        """
+        Runs the image capture process.
+        """
         if self.use_camera:
             # Read image. 
             # Some cameras will return 'None' on read until they are initialized, 
