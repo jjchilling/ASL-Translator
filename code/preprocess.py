@@ -21,7 +21,6 @@ class Datasets():
     def __init__(self, data_path, task):
 
         self.data_path = data_path
-        self.task = task
 
         # Dictionaries for (label index) <--> (class name)
         self.idx_to_class = {}
@@ -85,19 +84,6 @@ class Datasets():
 
         self.std = np.std(data_sample, axis=0)
 
-        # ==========================================================
-
-        # print("Dataset mean shape: [{0}, {1}, {2}]".format(
-        #     self.mean.shape[0], self.mean.shape[1], self.mean.shape[2]))
-
-        # print("Dataset mean top left pixel value: [{0:.4f}, {1:.4f}, {2:.4f}]".format(
-        #     self.mean[0,0,0], self.mean[0,0,1], self.mean[0,0,2]))
-
-        # print("Dataset std shape: [{0}, {1}, {2}]".format(
-        #     self.std.shape[0], self.std.shape[1], self.std.shape[2]))
-
-        # print("Dataset std top left pixel value: [{0:.4f}, {1:.4f}, {2:.4f}]".format(
-        #     self.std[0,0,0], self.std[0,0,1], self.std[0,0,2]))
 
     def standardize(self, img):
         """ Function for applying standardization to an input image.
@@ -109,42 +95,20 @@ class Datasets():
             img - numpy array of shape (image size, image size, 3)
         """
 
-        # =============================================================
-
         img = (img - self.mean) / self.std
-
-        # =============================================================
 
         return img
 
     def preprocess_fn(self, img):
         """ Preprocess function for ImageDataGenerator. """
 
-        if self.task == '3':
-            img = tf.keras.applications.vgg16.preprocess_input(img)
-        else:
-            img = img / 255.
-            img = self.standardize(img)
+        img = tf.keras.applications.vgg16.preprocess_input(img)
         return img
 
     def custom_preprocess_fn(self, img):
         """ Custom preprocess function for ImageDataGenerator. """
 
-        if self.task == '3':
-            img = tf.keras.applications.vgg16.preprocess_input(img)
-        else:
-            img = img / 255.
-            img = self.standardize(img)
-
-        # EXTRA CREDIT: 
-        # Write your own custom data augmentation procedure, creating
-        # an effect that cannot be achieved using the arguments of
-        # ImageDataGenerator. This can potentially boost your accuracy
-        # in the validation set. Note that this augmentation should
-        # only be applied to some input images, so make use of the
-        # 'random' module to make sure this happens. Also, make sure
-        # that ImageDataGenerator uses *this* function for preprocessing
-        # on augmented data.
+        img = tf.keras.applications.vgg16.preprocess_input(img)
 
         if random.random() < 0.3:
             img = img + tf.random.uniform(

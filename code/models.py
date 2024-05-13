@@ -1,5 +1,4 @@
 """
-Homework 5 - CNNs
 CS1430 - Computer Vision
 Brown University
 """
@@ -11,7 +10,13 @@ from keras.layers import \
 import hyperparameters as hp
 
 class VGGModel(tf.keras.Model):
+    """
+    This class defines a VGG model for image classification.
+    """
     def __init__(self):
+        """
+        Initializes the VGGModel instance with VGG-16 base layers and custom head layers for classification.
+        """
         super(VGGModel, self).__init__()
 
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=hp.learning_rate)

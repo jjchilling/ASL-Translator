@@ -7,7 +7,7 @@ Brown University
 import os
 import sys
 import argparse
-import re
+# import re
 from datetime import datetime
 import tensorflow as tf
 
@@ -21,7 +21,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 from live import live
 
-import copy
+# import copy
 
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -131,7 +131,7 @@ def classify_image(datasets, model):
 
 def main():
 
-    datasets = Datasets(ARGS.data, '3')
+    datasets = Datasets(ARGS.data,'3')
 
     # just for training the model
     if ARGS.train == 'True':
