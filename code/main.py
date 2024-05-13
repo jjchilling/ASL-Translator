@@ -92,44 +92,10 @@ def test(model, test_data):
         verbose=1,
     )
 
-
-def classify_image(datasets, model):
-    test = datasets.get_data("../data/test", True, True, True)
-    count = 0
-    predictions = []
-
-    for batch in test:
-        if (count==29):
-            break
-        for i, image in enumerate(batch[0]):
-            correct_class_idx = batch[1][i]
-            #probabilities = model.vgg16(np.array([image])).numpy()[0]
-            output = model.call(np.array([image]))
-            probabilities = output.numpy()[0]
-            predict_class_idx = np.argmax(probabilities)
-            predictions.append(predict_class_idx)
-            prediction_label = datasets.idx_to_class[predict_class_idx]
-            print("Predicted label:", prediction_label)
-
-            # This undoes vgg processing from stencil
-            mean = [103.939, 116.779, 123.68]
-            image[..., 0] += mean[0]
-            image[..., 1] += mean[1]
-            image[..., 2] += mean[2]
-            image = image[:, :, ::-1]
-            image = image / 255.
-            image = np.clip(image, 0., 1.)
-            
-            #shows the image so you can compare it to the predicted label in the terminal
-            plt.imshow(image)
-            plt.show()
-
-        count += 1
-    # prediction = np.argmax(predictions)
-    # print("prediction: ", prediction)
-
-
 def main():
+    """
+    Main function
+    """
 
     datasets = Datasets(ARGS.data,'3')
 
@@ -156,22 +122,6 @@ def main():
         metrics=["sparse_categorical_accuracy"])
 
         train(model, datasets, checkpoint_path, logs_path, init_epoch)
-
-
-############################################################
-    else :
-        """ Main function. """
-        # loading model
-        # model = VGGModel()
-        # model(tf.keras.Input(shape=(224, 224, 3)))
-        # model.vgg16.load_weights('vgg16_imagenet.h5', by_name=True)
-        # # model.head.load_weights('checkpoints/vgg_model/042324-233248/vgg.weights.e026-acc0.9286.h5', by_name=False)
-        # model.head.load_weights('checkpoints/vgg_model/043024-144031//vgg.weights.e012-acc0.9655.h5', by_name=False)
-        # model.compile(
-        #     optimizer=model.optimizer,
-        #     loss=model.loss_fn,
-        #     metrics=["sparse_categorical_accuracy"])
-        # classify_image(datasets, model)
             
 
 # Make arguments global
