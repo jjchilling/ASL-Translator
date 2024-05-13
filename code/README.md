@@ -6,7 +6,6 @@
 alphabets in real-time. The code lives in /code directory, in which live.py has our camera functionality, main.py has our training functionality, models.py contains code
 pertaining to our model, and preprocess.py contains all the frame processing code.
 
-
 # 💻 How to
 
 - Run the following commands:
