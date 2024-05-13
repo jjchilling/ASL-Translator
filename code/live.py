@@ -25,17 +25,13 @@ This program captures images from a camera using OpenCV and performs image class
 
 import cv2 # opencv-based functions
 import time
-# import math
 import numpy as np
 from scipy import stats
-# from skimage import io
-# from skimage import img_as_float32, img_as_ubyte
-# from skimage.color import rgb2gray
 from preprocess import Datasets
 from models import VGGModel
 import os
 import tensorflow as tf
-# from matplotlib import pyplot as plt
+
 
 
 
